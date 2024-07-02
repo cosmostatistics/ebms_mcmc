@@ -1,0 +1,5 @@
+max_poly_degree: 10
+evidence_file: output/run/evidences.npz
+n_iterations: 10000
+prior_kind: normalisable
+prop_dist: poisson
