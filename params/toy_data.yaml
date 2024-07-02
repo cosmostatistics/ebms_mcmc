@@ -1,0 +1,14 @@
+
+
+max_poly_degree: 2
+noise_scale: 0.1
+num_points: 300
+x_range: [-1, 1]
+params: 
+  method: random # deterministic, leaky
+  bin: [0, 1, ,1]
+  range: [-1, 1]
+plot: False
+save: False
+save_path: 'data/'
+
