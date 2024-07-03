@@ -1,19 +1,154 @@
+import os
+import logging
+from typing import Tuple
+import numpy as np
+from scipy.special import binom, factorial
+from scipy.integrate import solve_ivp
+from scipy.stats import norm
+
+import pymultinest
+
 class Supernova:
-    def __init__(self):
+    def __init__(self, params: dict) -> None:
         #Data handling
+        data_path = 'data/pantheon_data.npz'
+        data = np.loadtxt(data_path)
+        self.z_data = data['z_cmb']
+        self.z_hel = data['z_hel']
+        self.m_obs = data['m_obs']
+        self.covmat = data['covmat']
+        self.n_data = len(self.z_data)
+        self.y_data_inv_covariance = np.linalg.inv(self.covmat)
+        # param handling
+        self.params = params
+        self.max_poly_deg = params['max_poly_degree']
         #Evidence file handling
-        pass
+        try:
+            evi = np.load(self.params['resume_evidence_file'])
+            bin_model = evi['bin_model']
+            log_evidence = evi['log_evidence']
+            log_evidence_error = evi['log_evidence_error']
+        except:
+            bin_model = []
+            log_evidence = []
+            log_evidence_error = []
+        np.savez(self.params['name']+'evidence.npz',
+                 bin_model = bin_model,
+                 log_evidence = log_evidence,
+                 log_evidence_error = log_evidence_error)
+        
+    def distance_lum_ode(self,
+                         z: float,
+                         d_L: float,
+                         bin_model: np.array,
+                         theta: np.array,
+                         omega_m: float) -> float:
+        HUBBLE = 70
+        SPEED_OF_LIGHT = 299792458
+        a = 1/(1+z)
+        factors_dlumi = np.zeros(self.max_poly_deg)
+        for j in range(1,self.max_poly_deg+1):
+            if bin_model[j] == 1:
+                for k in range(1,j+1):
+                    factors_dlumi[j-1] += (-1)**k/k * binom(j,k) * (a**k-1)
+                    
+        k_value = np.arange(0,self.max_poly_deg+1,dtype=int)
+        I1 = np.log(a)*(1+np.sum(theta / factorial(k_value)))
+        I2 = np.sum(factors_dlumi*theta[1:]/factorial(k_value[1:]))
+        exponent = -3*(I1 + I2)
+        H = HUBBLE * np.sqrt(omega_m * (1+z)**3 + (1-omega_m)*np.exp(exponent))
+        dd_L = d_L / (1+z) + (1+z) * SPEED_OF_LIGHT / H
+        return dd_L
     
-    def distance_lum_ode():
-        #Distance luminosity ODE
-        pass
-    
-    def calc_dist_mod():
+    def calc_dist_mod(self, 
+                      bin_model: np.array,
+                      theta: np.array,
+                      omega_m: float) -> np.array:
         #Calculate distance modulus
-        pass
+        t_span = (0, self.z_data[-1])
+        y0 = np.array([0.])
+        sol = solve_ivp(self.distance_lum_ode, t_span, y0,t_eval=self.z_data, method='RK45',  args=(bin_model, theta,omega_m))
+        try:
+            d_L = sol.y[0]
+        except:
+            d_L = np.inf
+        redshift_corr = (1 + self.z_data )/(1+self.z_hel)
+        modulus = 5 * np.log10(d_L * redshift_corr) + 10
+        return modulus
     
-    def Log_Evidence_Supernovae():
+    def log_likelihood(self,
+                       bin_model: np.array,
+                       thetas: np.array,
+                       omega_m: float,
+                       M: float) -> float:
+        for i,b in enumerate(bin_model):
+                if b == 0:
+                    thetas = np.insert(thetas, i, 0) 
+        y_pred = self.calc_dist_mod_int(bin_model, thetas, omega_m)
+        residuals = self.m_obs - M - y_pred
+        return -0.5 * (residuals).T @ self.y_data_inv_covariance @ residuals
+    
+    def log_evidence(self, bin_model: np.array) -> Tuple[float, float]:
         #Log evidence for supernovae
-        pass
-    
+
+        loglike = lambda cube, ndim, nparams: self.log_likelihood(bin_model, 
+                                                                  np.array([cube[i] for i in range(ndim-2)]),
+                                                                    cube[ndim-2],
+                                                                    cube[ndim-1])
+        w_min, w_max = self.params['prior_range']
+        def prior_uniform(cube, ndim, nparams):
+            for i in range(ndim-2):
+                cube[i] = w_min + (w_max - w_min) * cube[i]
+            omega_m_min, omega_m_max = 0, 1 
+            M_min, M_max = -22, -17
+            cube[ndim-2] = omega_m_min + (omega_m_max - omega_m_min) * cube[ndim-2]
+            cube[ndim-1] = M_min + (M_max - M_min) * cube[ndim-1]
+        def prior_gaussian(cube, ndim, nparams):
+            mu = (w_min+w_max)/2
+            sigma = w_max-mu
+            rvs = norm(loc=mu,scale=sigma)
+            for i in range(0,ndim-2):
+                cube[i] = rvs.ppf(cube[i])
+            omega_m_min, omega_m_max = 0, 1 
+            M_min, M_max = -22, -17
+            cube[ndim-2] = omega_m_min + (omega_m_max - omega_m_min) * cube[ndim-2]
+            cube[ndim-1] = M_min + (M_max - M_min) * cube[ndim-1]
+                
+        n_params = bin_model.sum() + 2
+        bin_model_str = ''.join([str(i) for i in bin_model])
+        output_multinest = 'chains_multinest/' + bin_model_str + '/'
+        os.makedirs(output_multinest, exist_ok=True)
+        
+        if self.params['prior'] == 'uniform':
+            prior = prior_uniform
+        elif self.params['prior'] == 'gaussian':
+            prior = prior_gaussian
+        else:
+            logging.error('Prior not implemented')
+
+        pymultinest.run(loglike, prior, n_params, outputfiles_basename=output_multinest,
+	                    resume = False, **self.params['multinest_params'])
+        json_data = pymultinest.Analyzer(n_params=n_params, outputfiles_basename=output_multinest)
+        stats = json_data.get_stats()
+        log_evidence = stats['nested importance sampling global log-evidence']
+        log_evidence_error = stats['nested importance sampling global log-evidence error']
+        self.append_to_evidence_file(bin_model, log_evidence, log_evidence_error)
+        return log_evidence, log_evidence_error
+        
+    def append_to_evidence_file(self,
+                                bin_model: np.array,
+                                log_evidence: float,
+                                log_evidence_error: float) -> None:
+        
+        evi = np.load(self.params['name']+'evidence.npz')
+        bin_model = np.append(evi['bin_model'], bin_model)
+        log_evidence = np.append(evi['log_evidence'], log_evidence)
+        log_evidence_error = np.append(evi['log_evidence_error'], log_evidence_error)
+        np.savez(self.params['name']+'evidence.npz',
+                 bin_model = bin_model,
+                 log_evidence = log_evidence,
+                 log_evidence_error = log_evidence_error)
+        
+        
+        
     
