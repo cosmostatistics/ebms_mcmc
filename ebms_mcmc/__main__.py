@@ -48,6 +48,11 @@ def data(args: argparse.Namespace) -> None:
     params = parse(args.paramcard)
     dir_name = 'data/'+params['name']+'/'
     init_logger(fn=dir_name, verbose=args.verbose)
+    logging.info(f"Generating {params['num_data_sets']} toy data sets")
+    logging.info("with the following settings:")
+    separator()
+    for key, value in params.items():
+        logging.info(f"{key}: {value}")
     for i in range(params['num_data_sets']):
         params['name'] = dir_name+'/'+str(i)+'/'
         data, param, bin = generate_toy_data.gen_toy_data(**params)
