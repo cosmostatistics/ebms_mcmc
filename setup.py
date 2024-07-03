@@ -5,7 +5,11 @@ from setuptools import setup, find_packages
 with open("README.md", "r") as fh:
     long_description = fh.read()
 
-requirements = ["numpy", "scipy", "pyyaml"]
+requirements = ["numpy", "scipy", "pyyaml", "seaborn"]
+
+extras_require = {
+    "non_anlytical_evidence": ["pymultinest"],
+}
 
 setup(
     name="ebms_mcmc",
@@ -24,5 +28,6 @@ setup(
     python_requires=">=3.6",
     packages=find_packages(),#exclude=["tests"]),
     install_requires=requirements,
-    #entry_points={"console_scripts": ["ebms_mcmc=ebms_mcmc.__main__:main"]},
+    extras_require=extras_require,
+    entry_points={"console_scripts": ["ebms_mcmc=ebms_mcmc.__main__:main"]},
 )
