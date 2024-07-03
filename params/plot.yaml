@@ -1,0 +1,3 @@
+run_name: run
+plot_dir: plots
+log_plot: True

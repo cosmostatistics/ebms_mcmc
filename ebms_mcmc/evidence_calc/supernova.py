@@ -8,7 +8,7 @@ from scipy.stats import norm
 
 import pymultinest
 
-from ebms_mcmc.util.logger import separator
+from ..util.logger import separator
 
 class Supernova:
     """
