@@ -40,15 +40,10 @@ class MCMC:
         """
         self.params = params
         self.max_poly_deg = params['max_poly_degree']
-        # try loading evidences from a previous run
-        try:
-            self.binairies = np.load(params['evidence_file'])['binaires']
-            self.log_evidences = np.load(params['evidence_file'])['log_evidence'] 
-            self.log_evidences_error = np.load(params['evidence_file'])['log_evidence_error']
-        except:
-            self.binairies = []
-            self.log_evidences = []
-            self.log_evidences_error = []
+        evi = np.load(params['name']+'evidence.npz')
+        self.binairies = evi['binaires']
+        self.log_evidences = evi['log_evidence'] 
+        self.log_evidences_error = evi['log_evidence_error']
 
     def run(self, 
             evidence_calculator: Callable,
@@ -83,7 +78,7 @@ class MCMC:
           
     def get_evidence(self, rep_act: np.array, evidence_calculator: Callable) -> None:
         """
-        Calculates the evidence for a given model and stores it in the MCMC object.
+        Calculates the evidence for a given model and appends it to the list.
 
         Args:
             rep_act (np.array): The binary representation of the model.
@@ -95,8 +90,7 @@ class MCMC:
             self.log_evidences.append(log_evidence_act)
             self.log_evidences_error.append(log_evidence_error)
         else:
-            log_evidence_act = self.log_evidences[self.binairies.index(rep_act)]
-            log_evidence_error = self.log_evidences_error[self.binairies.index(rep_act)]
+            pass
     
     def model_log_prior(self, rep: np.array, kind: str = 'normalisable') -> float:
         """
@@ -252,7 +246,7 @@ class MCMC:
         # Find the evidences for both models
         log_evi_act = self.log_evidences[self.binairies.index(rep_act)]
         log_evi_act_error = self.log_evidences_error[self.binairies.index(rep_act)]
-        log_evi_prop = self.get_evidence(rep_prop)
+        log_evi_prop = self.log_evidences[self.binairies.index(rep_prop)]
         log_evi_prop_error = self.log_evidences_error[self.binairies.index(rep_prop)]
         #Sample log evidences
         log_evi_act_sample = np.random.normal(log_evi_act, log_evi_act_error)
