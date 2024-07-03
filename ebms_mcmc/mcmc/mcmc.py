@@ -4,6 +4,8 @@ from typing import Tuple, List, Callable
 import numpy as np
 from scipy.special import binom
 
+from ..util.logger import separator
+
 
 class MCMC:
     """
@@ -23,6 +25,7 @@ class MCMC:
     Methods:
         run: Runs the MCMC algorithm.
         get_evidence: Calculates the evidence for a given model.
+        find_index: Finds the index of an array within a list of arrays.
         model_log_prior: Calculates the log prior for a given model.
         corrections: Calculates the correction factor for a proposed model.
         find_new_propostion: Finds a new proposition for the next iteration.
@@ -40,10 +43,18 @@ class MCMC:
         """
         self.params = params
         self.max_poly_deg = params['max_poly_degree']
-        evi = np.load(params['name']+'evidence.npz')
-        self.binairies = evi['binaires']
-        self.log_evidences = evi['log_evidence'] 
-        self.log_evidences_error = evi['log_evidence_error']
+        self.binairies = []
+        self.log_evidences = []
+        self.log_evidences_error = []
+        with open(params['name']+'evidence.txt', 'r') as f:
+            lines = f.readlines()
+        for line in lines[1:]:
+            bin_rep = np.array([int(i) for i in line.split()[0].split(',')])
+            if len(bin_rep)>self.max_poly_deg+1:
+                bin_rep = bin_rep[:self.max_poly_deg+1]
+            self.binairies.append(bin_rep)
+            self.log_evidences.append(float(line.split()[1]))
+            self.log_evidences_error.append(float(line.split()[2]))
 
     def run(self, 
             evidence_calculator: Callable,
@@ -55,6 +66,7 @@ class MCMC:
             evidence_calculator (Callable): A function that calculates the evidence for a given model.
             rep_init (np.array, optional): The initial proposition for the MCMC algorithm. Defaults to None.
         """
+        separator()
         path = []
         if rep_init is None:
             rep_init = np.zeros(self.max_poly_deg+1, dtype=np.int8)
@@ -84,13 +96,32 @@ class MCMC:
             rep_act (np.array): The binary representation of the model.
             evidence_calculator (Callable): A function that calculates the evidence for a given model.
         """
-        if rep_act not in self.binairies:
+        # check if model is already in list
+        
+        exists = any(np.array_equal(rep_act, x) for x in self.binairies)
+        if not exists:
             self.binairies.append(rep_act)
             log_evidence_act, log_evidence_error = evidence_calculator(rep_act)
             self.log_evidences.append(log_evidence_act)
             self.log_evidences_error.append(log_evidence_error)
         else:
             pass
+        
+    def find_index(self, array: np.array, list_of_arrays: List[np.array]) -> int:
+            """
+            Find the index of an array within a list of arrays.
+
+            Parameters:
+            array (np.array): The array to search for.
+            list_of_arrays (List[np.array]): The list of arrays to search in.
+
+            Returns:
+            int: The index of the array in the list, or None if not found.
+            """
+            for idx, arr in enumerate(list_of_arrays):
+                if np.array_equal(array, arr):
+                    return idx
+            return None
     
     def model_log_prior(self, rep: np.array, kind: str = 'normalisable') -> float:
         """
@@ -174,7 +205,6 @@ class MCMC:
             steps = np.random.randint(1, 4)
         else:
             raise ValueError('Invalid proposal distribution')
-        print(steps)
         for s in range(steps):
             rep_act = self.single_step(rep_act)
         return rep_act
@@ -195,9 +225,8 @@ class MCMC:
         #Position of highest power in binary representation            
         pos_highest_power = np.max(np.where(rep_act_loop == 1))
         #Choose direction to persue (diagonal vs. horizontal)
-        dir = np.random.choice(['d', 'h'])
         while np.all(rep_prop == rep_act):
-            print(rep_prop)
+            dir = np.random.choice(['d', 'h'])
             #Performing diagonal move
             if dir == 'd':
                 #Choose whether to increase/ decrease polynomial degree
@@ -244,10 +273,12 @@ class MCMC:
             bool: True if the proposed model is accepted, False otherwise.
         """
         # Find the evidences for both models
-        log_evi_act = self.log_evidences[self.binairies.index(rep_act)]
-        log_evi_act_error = self.log_evidences_error[self.binairies.index(rep_act)]
-        log_evi_prop = self.log_evidences[self.binairies.index(rep_prop)]
-        log_evi_prop_error = self.log_evidences_error[self.binairies.index(rep_prop)]
+        act_index = self.find_index(rep_act, self.binairies)
+        log_evi_act = self.log_evidences[act_index]
+        log_evi_act_error = self.log_evidences_error[act_index]
+        prop_index = self.find_index(rep_prop, self.binairies)
+        log_evi_prop = self.log_evidences[prop_index]
+        log_evi_prop_error = self.log_evidences_error[prop_index]
         #Sample log evidences
         log_evi_act_sample = np.random.normal(log_evi_act, log_evi_act_error)
         log_evi_prop_sample = np.random.normal(log_evi_prop, log_evi_prop_error)
@@ -268,10 +299,5 @@ class MCMC:
         Args:
             path (List): A list of binary representations of models visited during the MCMC algorithm.
         """
-        output_dir = self.params['output_dir']
-        np.savez(output_dir + 'evidences.npz',
-                 binaires = self.binairies,
-                 log_evidence = self.log_evidences,
-                 log_evidence_error = self.log_evidences_error)
-        np.save(output_dir + 'path.npy', path)
+        np.save(self.params['name'] + 'path.npy', path)
 

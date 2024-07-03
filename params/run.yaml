@@ -1,11 +1,13 @@
 name: run
 data_type: supernova
 max_poly_degree: 10
-resume_evidence_file: output/run/evidences.npz
+resume_evidence_file: output/run_20240703/evidence.txt
 n_iterations: 10000
 prior_kind: normalisable
 prop_dist: poisson
-prior_range: [-3, 0.33]
+
+param_prior: 'uniform'
+param_prior_range: [-3, 0.33]
 multinest_params:
   evidence_tolerance: 0.5
   n_live_points: 400

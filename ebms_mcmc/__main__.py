@@ -6,7 +6,7 @@ from typing import Tuple, Callable
 from .util.parse import parse, setup_dir, prep_output
 from .util.logger import init_logger, separator
 from .gen_data import generate_toy_data
-from .mcmc import MCMC
+from .mcmc.mcmc import MCMC
 
 
 def main():
@@ -28,7 +28,7 @@ def main():
     data_parser.add_argument("--verbose", action="store_true")
     data_parser.set_defaults(func=data)
     
-    train_parser = subparsers.add_parser("train")
+    train_parser = subparsers.add_parser("run")
     train_parser.add_argument("paramcard")
     train_parser.add_argument("--verbose", action="store_true")
     train_parser.set_defaults(func=run)
@@ -70,9 +70,11 @@ def run(args: argparse.Namespace) -> None:
     run_name = setup_dir(args.paramcard)
     params['name'] = run_name
     init_logger(fn=run_name, verbose=args.verbose)
+    logging.info("Starting MCMC run")
+    separator()
     params.update({'multinest_params': {'verbose': args.verbose}})  
     evidence_calculator = setup_evidence_calculator(params)
-    MCMC(params, evidence_calculator).run()
+    MCMC(params).run(evidence_calculator)
     
 def plot(args: argparse.Namespace) -> None:
     pass

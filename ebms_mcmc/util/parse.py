@@ -43,13 +43,12 @@ def find_run(dir_snippet: str) -> Tuple[str, bool]:
     """
     dir = ['output/' + x for x in os.listdir('output/') if dir_snippet in x]
     if len(dir) > 1:
-        logging.info("Multiple runs found with the same name")
-        sys.exit()
+        sys.exit("Error: Multiple runs found with the same name")
     elif len(dir) == 0:
         return None, False
     else:
-        logging.info("Warning: Continuing in an existing directory")
-        return dir[0], True
+        print("Warning: Continuing in an existing directory")
+        return dir[0]+'/', True
 
 def setup_dir(file: str) -> str:
     """
@@ -65,9 +64,8 @@ def setup_dir(file: str) -> str:
     full_run_name, run_exists = find_run(params['name'])
     if not run_exists:
         now = datetime.now()
-        full_run_name = "output/" + params['name'] + "_" + now.strftime("%Y%m%d")
+        full_run_name = "output/" + params['name'] + "_" + now.strftime("%Y%m%d")+'/'
     os.makedirs(full_run_name, exist_ok=True)
-    os.makedirs(full_run_name+'/models/', exist_ok=True)
     shutil.copy(file, full_run_name)
     return full_run_name
 
@@ -89,8 +87,7 @@ def prep_output(file: str) -> Tuple[str, str]:
     plot_dir = params['plot']['plot_dir']
     run_name, run_exists = find_run(dir_snippet)
     if not run_exists:
-        logging.info("No run found with the same name")
-        sys.exit()
+        sys.exit("Error: Run not found")
     plot_dir = run_name + '/' + plot_dir + '/'
     os.makedirs(plot_dir, exist_ok=True)
     shutil.copy(file, plot_dir)
