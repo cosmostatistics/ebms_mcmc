@@ -1,14 +1,15 @@
-
-
+# Description: Toy data generation parameters
+name: data_1
+num_data_sets: 10
 max_poly_degree: 2
 noise_scale: 0.1
 num_points: 300
 x_range: [-1, 1]
 params: 
   method: random # deterministic, leaky
-  bin: [0, 1, ,1]
+  bin: [0, 1, 1]
   range: [-1, 1]
-plot: False
-save: False
-save_path: 'data/'
+plot: True
+save: True
+
 

@@ -46,8 +46,11 @@ def data(args: argparse.Namespace) -> None:
     Function to generate polynomial toy data
     """
     params = parse(args.paramcard)
-    init_logger(fn=params['logging_name'], verbose=args.verbose)
-    generate_toy_data(params)
+    dir_name = 'data/'+params['name']+'/'
+    init_logger(fn=dir_name, verbose=args.verbose)
+    for i in range(params['num_data_sets']):
+        params['name'] = dir_name+'/'+str(i)+'/'
+        data, param, bin = generate_toy_data.gen_toy_data(**params)
     
 def setup_evidence_calculator(params: dict) -> Callable:
     """
