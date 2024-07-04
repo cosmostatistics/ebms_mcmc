@@ -87,6 +87,10 @@ class MCMC:
             path.append(rep_act)
         logging.info(f'Acceptance rate: {accept/self.params["n_iterations"]}')
         self.save(path)
+        BURN_IN = 0.1
+        path_models, path_counts = np.unique(path[int(self.params["n_iterations"]*BURN_IN):], return_counts=True, axis = 0)
+        chosen_model = path_models[np.argmax(path_counts)]
+        logging.info(f'Chosen model: {chosen_model}')
           
     def get_evidence(self, rep_act: np.array, evidence_calculator: Callable) -> None:
         """

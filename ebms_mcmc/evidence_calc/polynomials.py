@@ -5,8 +5,29 @@ import os
 from ..util.logger import separator
 
 class Polynomials:
-    
+    """
+    A class for calculating the log evidence for a given polynomial model and polynomial toy data.
+
+    Attributes:
+        x_data (numpy.ndarray): The x data.
+        y_data (numpy.ndarray): The y data.
+        y_err (numpy.ndarray): The y error.
+        n_data (int): The number of data points.
+        params (dict): Dictionary of parameters.
+        max_poly_degree (int): The maximum polynomial degree.
+        x_pow (numpy.ndarray): The power of x data.
+        covariance (numpy.ndarray): The covariance matrix.
+        inv_covariance (numpy.ndarray): The inverse covariance matrix.
+        yCy (float): The product of y_data, inv_covariance, and y_data.
+    """
+
     def __init__(self, params: dict) -> None:
+        """
+        Initializes the Polynomials class.
+
+        Args:
+            params (dict): A dictionary containing the parameters for the class.
+        """
         
         # Data handling
         data_path = params['data_path']
@@ -64,6 +85,15 @@ class Polynomials:
             f.write(str(bin_rep_write) + '    ' + str(log_evidence) + '    ' + str(log_evidence_error) + '\n')
     
     def log_evidence(self, bin_model: np.array) -> Tuple[float, float]:
+        """
+        Calculates the log evidence.
+
+        Args:
+            bin_model (numpy.ndarray): The binary model.
+
+        Returns:
+            Tuple[float, float]: The log evidence and log evidence error.
+        """
         
         active = bin_model == 1
         x_model = self.x_pow[:, active]
@@ -86,11 +116,34 @@ class Polynomials:
         return log_evidence, log_evidence_error        
         
     def log_evidence_one(self, bin_model: np.array, Fisher_matrix: np.ndarray, Q: np.array) -> float:
+        """
+        Calculates the log evidence using a one parameter prior.
+
+        Args:
+            bin_model (numpy.ndarray): The binary model.
+            Fisher_matrix (numpy.ndarray): The Fisher matrix.
+            Q (numpy.ndarray): The Q matrix.
+
+        Returns:
+            float: The log evidence.
+        """
         FQQ = Q.T @ np.linalg.inv(Fisher_matrix) @ Q
         log_evidence = 0.5 * bin_model.sum() * np.log(2*np.pi) - 0.5*np.log(np.linalg.det(Fisher_matrix)) + 0.5 * FQQ
         return log_evidence, 0
     
     def log_evidence_gaussian(self, bin_model: np.array, Fisher_matrix: np.ndarray, Q: np.array, active: np.ndarray[np.bool_]) -> float:
+        """
+        Calculates the log evidence using a Gaussian parameter prior.
+
+        Args:
+            bin_model (numpy.ndarray): The binary model.
+            Fisher_matrix (numpy.ndarray): The Fisher matrix.
+            Q (numpy.ndarray): The Q matrix.
+            active (numpy.ndarray): The active array.
+
+        Returns:
+            float: The log evidence.
+        """
         try:
             prior_Fisher_Gaussian = self.params['prior_gaussian_inv_cov'] * np.eye(self.max_poly_degree+1)[active][:,active]  
         except:
@@ -108,6 +161,17 @@ class Polynomials:
         return log_evidence, 0
     
     def log_evidence_uniform(self, bin_model: np.array, Fisher_matrix: np.ndarray, Q: np.array) -> float:
+        """
+        Calculates the log evidence using a uniform parameter prior.
+
+        Args:
+            bin_model (numpy.ndarray): The binary model.
+            Fisher_matrix (numpy.ndarray): The Fisher matrix.
+            Q (numpy.ndarray): The Q matrix.
+
+        Returns:
+            float: The log evidence.
+        """
         try:
             import pymultinest
         except ImportError:
@@ -118,8 +182,11 @@ class Polynomials:
             thetas = np.array([cube[i] for i in range(ndim)])
             loglikelihood = Q.T @ thetas - 0.5 * thetas.T @ Fisher_matrix @ thetas
             return loglikelihood
-        
-        theta_min, theta_max = self.params['param_prior_range']
+        try:
+            theta_min, theta_max = self.params['param_prior_range']
+        except:
+            logging.info('No prior range provided. Using -1 and 1 as default.')
+            theta_min, theta_max = -1, 1
                     
         def prior_uniform(cube, ndim, nparams):
             for i in range(ndim):
