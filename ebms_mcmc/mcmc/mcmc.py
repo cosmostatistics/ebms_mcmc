@@ -285,7 +285,7 @@ class MCMC:
         #Calculate log prior for both models
         log_prior_act = self.model_log_prior(rep_act, kind = self.params['prior_kind'])
         log_prior_prop = self.model_log_prior(rep_prop, kind = self.params['prior_kind'])
-        proba = np.exp( log_evi_act_sample + log_prior_act - log_evi_prop_sample - log_prior_prop)
+        proba = np.exp( log_evi_prop_sample + log_prior_prop - log_evi_act_sample - log_prior_act)
         proba = proba * self.corrections(rep_act, rep_prop)
         if proba > 1:
             return True
