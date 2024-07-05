@@ -147,7 +147,7 @@ class Plotting:
         plt.legend()
         plt.xlabel('x')
         plt.ylabel('y')
-        plt.legend()
+        plt.legend(loc = 'upper right')
         plt.savefig(self.params['plot_dir'] + 'polynomial_data.pdf')
         plt.close()
         

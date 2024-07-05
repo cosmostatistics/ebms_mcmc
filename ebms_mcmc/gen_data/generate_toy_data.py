@@ -31,11 +31,18 @@ def gen_toy_data(max_poly_degree: int = 2,
                 else:
                     parameter[i] = 0
                     bin[i] = 0
-                    
+    elif params['method'] == 'fixed':
+        parameter = np.array(params['params'])
+        bin = np.array(params['bin'])
+        assert len(parameter) == np.sum(bin), 'Parameter and bin length mismatch'
+        for i, b in enumerate(bin):
+            if b == 0:
+                parameter = np.insert(parameter, i, 0)
+                 
     if not params['bin'] is None:
         parameter = parameter * params['bin']
         
-    x_pow = np.power(x[:, None], np.arange(0, max_poly_degree+1, 1, dtype=np.int64))
+    x_pow = np.power(x[:, None], np.arange(0, parameter.shape[0], 1, dtype=np.int64))
     toy_data = x_pow @ parameter + noise
     y_err = np.full(shape, noise_scale)
     if save:
@@ -43,9 +50,24 @@ def gen_toy_data(max_poly_degree: int = 2,
         np.savez(name+'toy_data.npz', x_data=x, y_data=toy_data, y_err = y_err,
                 params=parameter, bin=bin)
     if plot:
-        plt.errorbar(x, toy_data, yerr=y_err, fmt='o', ms=2)
-        plt.plot(x, x_pow @ parameter, label='True model', zorder = 10)
-        plt.legend()
+        text = r'$y = '  
+        for i in range(len(parameter)):
+            if bin[i] == 1:
+                if i == 0:
+                    text += f'{parameter[i]:.2f} +'
+                elif i == 1:
+                    text += f'{parameter[i]:.2f}x + '
+                else:
+                    text += f'{parameter[i]:.2f}x^{i} + '
+        text = text[:-2] + '$'
+        plt.text(0.1, 0.9, text, fontsize=12, ha='left', va='center', transform=plt.gca().transAxes,
+                 bbox=dict(facecolor='white', edgecolor='black', boxstyle='round,pad=0.5'))
+        plt.errorbar(x, toy_data, yerr=y_err, fmt='.', ms=5, color = 'teal', label='Data', alpha=0.5)
+        y_true = x_pow @ parameter
+        plt.plot(x, y_true, label='True model', zorder = 10, color = 'darkred')
+        plt.xlabel('x')
+        plt.ylabel('y')
+        plt.legend(loc='upper right')
         plt.savefig(name+'toy_data.pdf')
         
     return toy_data, parameter, bin
