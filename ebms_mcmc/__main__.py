@@ -7,6 +7,7 @@ from .util.parse import parse, setup_dir, prep_output
 from .util.logger import init_logger, separator
 from .gen_data import generate_toy_data
 from .mcmc.mcmc import MCMC
+from .eval.plotting import Plotting
 
 
 def main():
@@ -37,6 +38,11 @@ def main():
     plot_parser.add_argument("paramcard")
     plot_parser.add_argument("--verbose", action="store_true")
     plot_parser.set_defaults(func=plot)
+    
+    # plot_parser = subparsers.add_parser("complete")
+    # plot_parser.add_argument("paramcard")
+    # plot_parser.add_argument("--verbose", action="store_true")
+    # plot_parser.set_defaults(func=complete)
 
     args = parser.parse_args()
     args.func(args)
@@ -78,14 +84,20 @@ def run(args: argparse.Namespace) -> None:
     run_name = setup_dir(args.paramcard)
     params['name'] = run_name
     init_logger(fn=run_name, verbose=args.verbose)
-    logging.info("Starting MCMC run")
     separator()
     params.update({'multinest_params': {'verbose': args.verbose}})  
     evidence_calculator = setup_evidence_calculator(params)
     MCMC(params).run(evidence_calculator)
     
 def plot(args: argparse.Namespace) -> None:
-    pass
+    params = parse(args.paramcard)
+    run_name, plot_dir = prep_output(args.paramcard)
+    params["name"] = run_name
+    params['plot_dir'] = plot_dir    
+    shutil.copy(args.paramcard, plot_dir)
+    init_logger(fn=plot_dir, verbose=args.verbose)
+    Plotting(params).main()
+    
 
 if __name__ == "__main__":  
     main()

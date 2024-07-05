@@ -1,7 +1,7 @@
 name: run
 data_type: toy_data
 max_poly_degree: 6
-resume_evidence_file: output/run_20240703/evidence.txt
+# resume_evidence_file: output/run_20240703/evidence.txt
 n_iterations: 10000
 prior_kind: normalisable
 prop_dist: poisson

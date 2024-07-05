@@ -1,7 +1,10 @@
+import os
+import logging
+import shutil
 from typing import Tuple
 import numpy as np
-import logging
-import os
+import numpy.typing as npt
+
 from ..util.logger import separator
 
 class Polynomials:
@@ -36,6 +39,9 @@ class Polynomials:
         self.y_data = data['y_data']
         self.y_err = data['y_err']
         self.n_data = len(self.x_data)
+        # copy the data to the output directory
+        shutil.copy(data_path, params['name'])
+        
         
         # Param handling
         self.params = params
@@ -94,7 +100,7 @@ class Polynomials:
         Returns:
             Tuple[float, float]: The log evidence and log evidence error.
         """
-        
+        logging.info('Calculating evidence for bin model: {}'.format(bin_model))
         active = bin_model == 1
         x_model = self.x_pow[:, active]
         Fisher_matrix = x_model.T @ self.inv_covariance @ x_model
@@ -131,7 +137,7 @@ class Polynomials:
         log_evidence = 0.5 * bin_model.sum() * np.log(2*np.pi) - 0.5*np.log(np.linalg.det(Fisher_matrix)) + 0.5 * FQQ
         return log_evidence, 0
     
-    def log_evidence_gaussian(self, bin_model: np.array, Fisher_matrix: np.ndarray, Q: np.array, active: np.ndarray[np.bool_]) -> float:
+    def log_evidence_gaussian(self, bin_model: np.array, Fisher_matrix: np.ndarray, Q: np.array, active: npt.NDArray[np.bool_]) -> float:
         """
         Calculates the log evidence using a Gaussian parameter prior.
 

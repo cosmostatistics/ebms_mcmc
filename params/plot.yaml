@@ -1,3 +1,10 @@
-run_name: run
+name: run
 plot_dir: plots
-log_plot: True
+burn_in: 1000
+log_plot: False
+plots_to_do:
+  - 2d_color
+  - 2d_circle
+  - data
+  - marginals
+

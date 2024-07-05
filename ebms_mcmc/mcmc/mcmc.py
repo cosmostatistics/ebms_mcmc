@@ -66,6 +66,7 @@ class MCMC:
             evidence_calculator (Callable): A function that calculates the evidence for a given model.
             rep_init (np.array, optional): The initial proposition for the MCMC algorithm. Defaults to None.
         """
+        logging.info("Starting MCMC run")
         separator()
         path = []
         if rep_init is None:

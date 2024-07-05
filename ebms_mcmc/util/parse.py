@@ -84,7 +84,7 @@ def prep_output(file: str) -> Tuple[str, str]:
     """
     params = parse(file)
     dir_snippet = params['name']
-    plot_dir = params['plot']['plot_dir']
+    plot_dir = params['plot_dir']
     run_name, run_exists = find_run(dir_snippet)
     if not run_exists:
         sys.exit("Error: Run not found")

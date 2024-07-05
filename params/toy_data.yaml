@@ -1,6 +1,6 @@
 # Description: Toy data generation parameters
-name: data_1
-num_data_sets: 1
+name: data_2
+num_data_sets: 10
 max_poly_degree: 2
 noise_scale: 0.1
 num_points: 300
