@@ -53,31 +53,32 @@ def find_run(dir_snippet: str) -> Tuple[str, bool]:
         print("Warning: Continuing in an existing directory")
         return dir[0]+'/', True
 
-def setup_dir(file: str) -> str:
+def setup_dir(params: dict) -> str:
     """
     Set up the directory structure for the training.
 
     Args:
-        file (str): The path to the input file.
+        params (dict): The parameter for the runs.
 
     Returns:
         str: The full path to the created directory.
     """
-    params = parse(file)
+    print(params)
     full_run_name, run_exists = find_run(params['name'])
     if not run_exists:
         now = datetime.now()
         full_run_name = "output/" + params['name'] + "_" + now.strftime("%Y%m%d")+'/'
     os.makedirs(full_run_name, exist_ok=True)
-    shutil.copy(file, full_run_name)
+    with open(full_run_name+'params.yaml', 'w') as file:
+        yaml.dump({'run': params}, file)
     return full_run_name
 
-def prep_output(file: str) -> Tuple[str, str]:
+def prep_output(params: dict) -> Tuple[str, str]:
     """
     Prepare the output directory for a specific run.
 
     Args:
-        file (str): The file path of the input file.
+        params (dict): The parameters for the ploting routing.
 
     Returns:
         Tuple[str, str]: A tuple containing the run name and the plot directory.
@@ -85,7 +86,6 @@ def prep_output(file: str) -> Tuple[str, str]:
     Raises:
         AssertionError: If multiple or no runs are found with the same name.
     """
-    params = parse(file)
     dir_snippet = params['name']
     plot_dir = params['plot_dir']
     run_name, run_exists = find_run(dir_snippet)
@@ -93,7 +93,8 @@ def prep_output(file: str) -> Tuple[str, str]:
         sys.exit("Error: Run not found")
     plot_dir = run_name + '/' + plot_dir + '/'
     os.makedirs(plot_dir, exist_ok=True)
-    shutil.copy(file, plot_dir)
+    with open(plot_dir+'params.yaml', 'w') as file:
+        yaml.dump({'plot': params}, file)
     return run_name, plot_dir
     
     

@@ -8,7 +8,7 @@ default_params = {
         'num_data_sets' : 1,
         # maximal polynomial degree of the underlying model
         'max_poly_degree' : 5,
-        # how muh noise
+        # how much noise
         'noise_scale' : 0.1,
         # how many data points
         'num_points' : 300,
