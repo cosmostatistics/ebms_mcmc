@@ -53,6 +53,24 @@ ebms_mcmc plot params/paramcard.yaml --verbose
 ebms_mcmc all params/paramcard.yaml --verbose
 ```
 
+## Include your own Models
+
+To add a new model, create a file named **'new_model.py'** in the **'ebms_mcmc/evidence_calc/'** directory. This file should contain a function that calculates the log evidence. The function signature should be:
+```
+def log_evidence(bin_model: np.array) -> Tuple[float, float]:
+    """
+    Calculate the log evidence.
+
+    Parameters:
+    bin_model (np.array): The binary model array.
+
+    Returns:
+    Tuple[float, float]: A tuple containing the log evidence and its error.
+    """
+'''
+Additionally, you need to ensure that your function writes the calculated log evidence to a file. You can follow the example provided by the **'write_evidence_file'** function in **'ebms_mcmc/evidence_calc/polynomials.py'**.
+
+
 ## Acknowledgements
 
 If you use any part of this repository please cite the following paper:
