@@ -1,10 +1,10 @@
-<h2 align="center">ebms-mcmc: Evidence based model selection with MCMC</h2>
+<h2 align="center">ebms-mcmc: Evidence Based Model Selection with MCMC</h2>
 
 <p align="center">
 <!-- <a href="https://arxiv.org/abs/2401.04174"><img alt="Arxiv" src="https://img.shields.io/badge/arXiv-2401.04174-b31b1b.svg"></a> -->
 
 
-**ebms-mcmc** is a tool for exploring polynomial model spaces with markov walks and performing bayesian model selection. It can extract the model posterior for a toy model with polynomial data and the dark energy equation of state in a polynomial parametrisation from the [Pantheon+][Pantheon+] dataset (needs to be manually included).
+**ebms-mcmc** is a tool for exploring polynomial model spaces with Markov walks and performing Bayesian model selection. It can extract the model posterior for (i) a toy model with polynomial data and for (ii) the dark energy equation of state in a polynomial parametrisation from the [Pantheon+][Pantheon+] dataset (needs to be manually included).
 
 [Pantheon+]: https://github.com/PantheonPlusSH0ES/DataRelease
 
@@ -31,7 +31,7 @@ There are four basic commands implemented, which all have the same structure:
 ```
 ebms_mcmc task params/paramcard.yaml --verbose
 ```
-The ```task``` specifies what to do, ```paramcard.yaml``` sets the parameters, which should differ from default value (defined in ```__init__.py```) and ```--verbose``` prints the output in the console, too.
+The ```task``` specifies what to do, ```paramcard.yaml``` sets the parameters different from the default values (defined in ```__init__.py```) and ```--verbose``` prints the output in the console.
 
 ### 1. Toy data generation:
 
@@ -39,23 +39,23 @@ The ```task``` specifies what to do, ```paramcard.yaml``` sets the parameters, w
 ebms_mcmc data params/paramcard.yaml --verbose
 ```
 
-### 2. Perform the mcmc run:
+### 2. Perform the MCMC run:
 
 ```
 ebms_mcmc run params/paramcard.yaml --verbose
 ```
 
-### 3. Analyse and plot the output:
+### 3. Analyse and plot the results:
 ```
 ebms_mcmc plot params/paramcard.yaml --verbose
 ```
 
-### 4. All of the above in one go:
+### 4. All of the above in one call:
 ```
 ebms_mcmc all params/paramcard.yaml --verbose
 ```
 
-## Include your own Models
+## Include your own models
 
 To add a new model, create a file named **'new_model.py'** in the **'ebms_mcmc/evidence_calc/'** directory. This file should contain a function that calculates the log evidence. The function signature should be:
 ```
