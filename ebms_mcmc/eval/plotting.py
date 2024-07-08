@@ -8,7 +8,38 @@ from matplotlib.backends.backend_pdf import PdfPages
 from ..util.logger import separator
 
 class Plotting:
+    """
+    A class for performing plotting routines.
+
+    Args:
+        params (dict): A dictionary containing the parameters.
+
+    Attributes:
+        params (dict): A dictionary containing the parameters.
+        path (numpy.ndarray): The path data.
+        max_poly_deg (int): The maximum polynomial degree.
+        chain_2d (numpy.ndarray): The 2D chain data.
+        data (numpy.ndarray): The data.
+        type (str): The type of data.
+
+    Methods:
+        analyse(): Analyzes the data and returns the results.
+        bin_to_2d(bin): Converts a binary array to 2D coordinates.
+        visualise_chain_2d_color(): Visualizes the chain in 2D with color.
+        visualise_chain_2d_circle(): Visualizes the chain in 2D with circles.
+        plot_polynomial_data(): Plots the polynomial data.
+        plot_supernova_data(): Plots the supernova data.
+        save_posterior_list(): Saves the posterior list.
+        plot_marginals(): Plots the marginals.
+    """
+
     def __init__(self, params: dict) -> None:
+        """
+        Initializes the Plotting class.
+
+        Args:
+            params (dict): A dictionary containing the parameters.
+        """
         logging.info("Performing the Plotting Routine")
         separator()
         self.params = params
@@ -26,7 +57,12 @@ class Plotting:
             self.type = 'supernova'
             
     def analyse(self) -> Tuple[np.array, np.array, np.array, np.array, np.array]:
-        
+        """
+        Analyzes the data and returns the results.
+
+        Returns:
+            Tuple[np.array, np.array, np.array, np.array, np.array]: A tuple containing the model binary, relative counts, bin mean, polynomial degree probability, and degrees of freedom probability.
+        """
         model_binairy,counts = np.unique(self.path,return_counts=True,axis=0)
         total_counts = np.sum(counts)
         relative_counts = counts/total_counts
@@ -43,11 +79,23 @@ class Plotting:
         return model_binairy, relative_counts, bin_mean, poly_degree_prob, dof_prob
     
     def bin_to_2d(self, bin: np.array) -> Tuple[int,int]:
+        """
+        Converts a binary array to 2D coordinates.
+
+        Args:
+            bin (numpy.ndarray): The binary array.
+
+        Returns:
+            Tuple[int,int]: The 2D coordinates.
+        """
         y_coord = np.max(np.where(bin == 1))
         x_coord = np.sum(bin[:y_coord+1])
         return x_coord, y_coord
     
     def visualise_chain_2d_color(self) -> None:
+        """
+        Visualizes the chain in 2D with color.
+        """
         logging.info("Visualising the chain in 2D with color")
 
         max_x = int(np.max(self.chain_2d[:,0])+1)
@@ -82,6 +130,9 @@ class Plotting:
         plt.close()
         
     def visualise_chain_2d_circle(self) -> None:
+        """
+        Visualizes the chain in 2D with circles.
+        """
         logging.info("Visualising the chain in 2D with circles")
         max_x = int(np.max(self.chain_2d[:,0])+1)
         max_y = int(np.max(self.chain_2d[:,1])+1)
@@ -122,6 +173,9 @@ class Plotting:
         plt.close()
         
     def plot_polynomial_data(self) -> None:
+        """
+        Plots the polynomial data.
+        """
         logging.info("Plotting the polynomial data")
         x_data = self.data['x_data']
         y_data = self.data['y_data']
@@ -152,6 +206,9 @@ class Plotting:
         plt.close()
         
     def plot_supernova_data(self) -> None:
+        """
+        Plots the supernova data.
+        """
         logging.info("Plotting the supernova data")
         z = self.data['z_cmb']
         m_obs = self.data['m_obs']
@@ -165,6 +222,9 @@ class Plotting:
         plt.close()
         
     def save_posterior_list(self):
+        """
+        Saves the posterior list.
+        """
         model_binairy, relative_counts, _, _, _ = self.analyse()
         sort_index = np.argsort(relative_counts)[::-1]
         with open(self.params['plot_dir'] + 'posterior_list.txt', 'w') as f:
@@ -176,6 +236,9 @@ class Plotting:
             f.write('----------------')
       
     def plot_marginals(self) -> None:
+        """
+        Plots the marginals.
+        """
         logging.info("Plotting the marginals")
         _, _, bin_mean, poly_degree_prob, dof_prob = self.analyse()
         max_x = int(np.max(self.chain_2d[:,0])+1)

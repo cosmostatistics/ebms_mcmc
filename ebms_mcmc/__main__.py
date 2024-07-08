@@ -3,6 +3,7 @@ import logging
 import shutil
 from typing import Tuple, Callable
 
+from . import default_params
 from .util.parse import parse, setup_dir, prep_output
 from .util.logger import init_logger, separator
 from .gen_data import generate_toy_data
@@ -14,28 +15,23 @@ def main():
     """
     Entry point of the program.
     Parses command line arguments and executes the corresponding function based on the subcommand.
-
-    Usage:
-        python __main__.py data <paramcard> [--verbose]
-        python __main__.py run <paramcard> [--verbose]
-        python __main__.py plot <paramcard> [--verbose]
     """
-
+    
     parser = argparse.ArgumentParser()
     subparsers = parser.add_subparsers(required=True)
     
     data_parser = subparsers.add_parser("data")
-    data_parser.add_argument("paramcard")
+    data_parser.add_argument("paramcard", nargs='?', default=None)
     data_parser.add_argument("--verbose", action="store_true")
     data_parser.set_defaults(func=data)
     
     train_parser = subparsers.add_parser("run")
-    train_parser.add_argument("paramcard")
+    train_parser.add_argument("paramcard", nargs='?', default=None)
     train_parser.add_argument("--verbose", action="store_true")
     train_parser.set_defaults(func=run)
 
     plot_parser = subparsers.add_parser("plot")
-    plot_parser.add_argument("paramcard")
+    plot_parser.add_argument("paramcard", nargs='?', default=None)
     plot_parser.add_argument("--verbose", action="store_true")
     plot_parser.set_defaults(func=plot)
     
@@ -51,7 +47,11 @@ def data(args: argparse.Namespace) -> None:
     """
     Function to generate polynomial toy data
     """
-    params = parse(args.paramcard)
+    ind_params = parse(args.paramcard)
+    try:
+        params = {**default_params['data'], **ind_params}
+    except:
+        params = default_params['data']
     dir_name = 'data/'+params['name']+'/'
     init_logger(fn=dir_name, verbose=args.verbose)
     logging.info(f"Generating {params['num_data_sets']} toy data sets")
@@ -80,7 +80,11 @@ def run(args: argparse.Namespace) -> None:
     """
     Function to run the MCMC
     """
-    params = parse(args.paramcard)
+    ind_params = parse(args.paramcard)
+    try:
+        params = {**default_params['run'], **ind_params}
+    except:
+        params = default_params['run']
     run_name = setup_dir(args.paramcard)
     params['name'] = run_name
     init_logger(fn=run_name, verbose=args.verbose)
@@ -90,6 +94,12 @@ def run(args: argparse.Namespace) -> None:
     MCMC(params).run(evidence_calculator)
     
 def plot(args: argparse.Namespace) -> None:
+    ind_params = parse(args.paramcard)
+    try:
+        params = {**default_params['plot'], **ind_params}
+    except:
+        params = default_params['plot']
+    params = {**default_params['run'], **ind_params}
     params = parse(args.paramcard)
     run_name, plot_dir = prep_output(args.paramcard)
     params["name"] = run_name

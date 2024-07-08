@@ -208,6 +208,8 @@ class MCMC:
             steps = np.random.poisson(0.5) + 1
         elif prop_dist == 'uniform':
             steps = np.random.randint(1, 4)
+        elif prop_dist == 'single':
+            steps = 1
         else:
             raise ValueError('Invalid proposal distribution')
         for s in range(steps):

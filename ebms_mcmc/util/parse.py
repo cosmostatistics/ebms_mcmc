@@ -19,12 +19,15 @@ def parse(file: str) -> dict:
     Raises:
         yaml.YAMLError: If there is an error while parsing the YAML file.
     """
-    with open(file, 'r') as stream:
-        try:
-            params = yaml.safe_load(stream)
-            return params
-        except yaml.YAMLError as exc:
-            print(exc)
+    try:
+        with open(file, 'r') as stream:
+            try:
+                params = yaml.safe_load(stream)
+                return params
+            except yaml.YAMLError as exc:
+                print(exc)
+    except:
+        print("Wrong path or no file given, continue with default parameters")
 
 def find_run(dir_snippet: str) -> Tuple[str, bool]:
     """
