@@ -18,10 +18,10 @@ class Polynomials:
         n_data (int): The number of data points.
         params (dict): Dictionary of parameters.
         max_poly_degree (int): The maximum polynomial degree.
-        x_pow (numpy.ndarray): The power of x data.
-        covariance (numpy.ndarray): The covariance matrix.
-        inv_covariance (numpy.ndarray): The inverse covariance matrix.
-        yCy (float): The product of y_data, inv_covariance, and y_data.
+        x_pow (numpy.ndarray): Design matrix of linear model, i.e. potentiated x values such that x_pow @ parameters = y_model.
+        covariance (numpy.ndarray): The covariance matrix of the y data.
+        inv_covariance (numpy.ndarray): The inverse covariance matrix of the y data.
+        yCy (float): The product of y_data, inv_covariance and y_data.
     """
 
     def __init__(self, params: dict) -> None:
@@ -29,7 +29,7 @@ class Polynomials:
         Initializes the Polynomials class.
 
         Args:
-            params (dict): A dictionary containing the parameters for the class.
+            params (dict): Dictionary of parameters.
         """
         
         # Data handling
@@ -92,7 +92,7 @@ class Polynomials:
     
     def log_evidence(self, bin_model: np.array) -> Tuple[float, float]:
         """
-        Calculates the log evidence.
+        Calculates the log evidence and its error.
 
         Args:
             bin_model (numpy.ndarray): The binary model.
@@ -121,34 +121,34 @@ class Polynomials:
         separator()
         return log_evidence, log_evidence_error        
         
-    def log_evidence_one(self, bin_model: np.array, Fisher_matrix: np.ndarray, Q: np.array) -> float:
+    def log_evidence_one(self, bin_model: np.array, Fisher_matrix: np.ndarray, Q: np.array) -> Tuple[float, float]:
         """
-        Calculates the log evidence using a one parameter prior.
+        Calculates the log evidence using the parameter prior being equal to one, i.e. prior(theta|y, M) = 1. Here, exact analytical solution, thus error is zero.
 
         Args:
             bin_model (numpy.ndarray): The binary model.
             Fisher_matrix (numpy.ndarray): The Fisher matrix.
-            Q (numpy.ndarray): The Q matrix.
+            Q (numpy.ndarray): Q array as defined in function self.log_evidence() or in the paper (section Linear Toy model) respectively.
 
         Returns:
-            float: The log evidence.
+            Tuple[float, float]: The log evidence and log evidence error.
         """
         FQQ = Q.T @ np.linalg.inv(Fisher_matrix) @ Q
         log_evidence = 0.5 * bin_model.sum() * np.log(2*np.pi) - 0.5*np.log(np.linalg.det(Fisher_matrix)) + 0.5 * FQQ
-        return log_evidence, 0
+        return log_evidence, 0.0
     
-    def log_evidence_gaussian(self, bin_model: np.array, Fisher_matrix: np.ndarray, Q: np.array, active: npt.NDArray[np.bool_]) -> float:
+    def log_evidence_gaussian(self, bin_model: np.array, Fisher_matrix: np.ndarray, Q: np.array, active: npt.NDArray[np.bool_]) -> Tuple[float, float]:
         """
-        Calculates the log evidence using a Gaussian parameter prior.
+        Calculates the log evidence using a Gaussian parameter prior. Here, exact analytical solution, thus error is zero.
 
         Args:
             bin_model (numpy.ndarray): The binary model.
             Fisher_matrix (numpy.ndarray): The Fisher matrix.
-            Q (numpy.ndarray): The Q matrix.
-            active (numpy.ndarray): The active array.
+            Q (numpy.ndarray): Q array as defined in function self.log_evidence() or in the paper (section Linear Toy model) respectively.
+            active (numpy.ndarray): Boolean array giving the active monomials in binary representation.
 
         Returns:
-            float: The log evidence.
+            Tuple[float, float]: The log evidence and log evidence error.
         """
         try:
             prior_Fisher_Gaussian = self.params['prior_gaussian_inv_cov'] * np.eye(self.max_poly_degree+1)[active][:,active]  
@@ -164,19 +164,19 @@ class Polynomials:
         Gexpexp = prior_exp_Gaussian.T @ prior_Fisher_Gaussian @ prior_exp_Gaussian
         FPQQ = (Q + prior_Fisher_Gaussian @ prior_exp_Gaussian).T @ np.linalg.inv(Fisher_matrix + prior_Fisher_Gaussian) @ (Q + prior_Fisher_Gaussian @ prior_exp_Gaussian)
         log_evidence = - log_norm_prior  - 0.5 * Gexpexp + bin_model.sum()/2 * np.log(2*np.pi) - 0.5 * np.log(np.linalg.det(Fisher_matrix + prior_Fisher_Gaussian)) + 0.5 * FPQQ
-        return log_evidence, 0
+        return log_evidence, 0.0
     
-    def log_evidence_uniform(self, bin_model: np.array, Fisher_matrix: np.ndarray, Q: np.array) -> float:
+    def log_evidence_uniform(self, bin_model: np.array, Fisher_matrix: np.ndarray, Q: np.array) -> Tuple[float, float]:
         """
-        Calculates the log evidence using a uniform parameter prior.
+        Calculates the log evidence using a uniform parameter prior with limits as specified in self.params['param_prior_range'].
 
         Args:
             bin_model (numpy.ndarray): The binary model.
             Fisher_matrix (numpy.ndarray): The Fisher matrix.
-            Q (numpy.ndarray): The Q matrix.
-
+            Q (numpy.ndarray): Q array as defined in function self.log_evidence() or in the paper (section Linear Toy model) respectively.
+            
         Returns:
-            float: The log evidence.
+            Tuple[float, float]: The log evidence and log evidence error.
         """
         try:
             import pymultinest
