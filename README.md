@@ -4,7 +4,7 @@
 <!-- <a href="https://arxiv.org/abs/2401.04174"><img alt="Arxiv" src="https://img.shields.io/badge/arXiv-2401.04174-b31b1b.svg"></a> -->
 
 
-ebms-mcmc is a tool for exploring polynomial model spaces with markov walks and performing bayesian model selection. It can extract the model posterior for a toy model with polynomial data and the dark energy equation of state in a polynomial parametrisation from the [Pantheon+][Pantheon+] dataset (needs to be manually included).
+**ebms-mcmc** is a tool for exploring polynomial model spaces with markov walks and performing bayesian model selection. It can extract the model posterior for a toy model with polynomial data and the dark energy equation of state in a polynomial parametrisation from the [Pantheon+][Pantheon+] dataset (needs to be manually included).
 
 [Pantheon+]: https://github.com/PantheonPlusSH0ES/DataRelease
 
