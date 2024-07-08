@@ -1,6 +1,8 @@
 tests/
 tests.ipynb
 
+data/*
+
 output/*
 data/* 
 
