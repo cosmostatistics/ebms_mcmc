@@ -33,24 +33,24 @@ ebms_mcmc task params/paramcard.yaml --verbose
 ```
 The ```task``` specifies what to do, ```paramcard.yaml``` sets the parameters, which should differ from default value (defined in ```__init__.py```) and ```--verbose``` prints the output in the console, too.
 
-1. Toy data generation:
+### 1. Toy data generation:
 
 ```
 ebms_mcmc data params/paramcard.yaml --verbose
 ```
 
-2. Perform the mcmc run:
+### 2. Perform the mcmc run:
 
 ```
 ebms_mcmc run params/paramcard.yaml --verbose
 ```
 
-3. Analyse and plot the output:
+### 3. Analyse and plot the output:
 ```
 ebms_mcmc plot params/paramcard.yaml --verbose
 ```
 
-4. All of the above in one go:
+### 4. All of the above in one go:
 ```
 ebms_mcmc all params/paramcard.yaml --verbose
 ```
