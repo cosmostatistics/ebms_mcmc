@@ -4,7 +4,7 @@
 <!-- <a href="https://arxiv.org/abs/2401.04174"><img alt="Arxiv" src="https://img.shields.io/badge/arXiv-2401.04174-b31b1b.svg"></a> -->
 
 
-ebms-mcmc is a tool for exploring polynomial model spaces with markov walks and performing bayesian model selection. It can extract the model posterior for a toy model with polynomial data and the dark energy equation of state in a polynomial parametrisation from the Pantheon+ dataset [Pantheon+][Pantheon+] (needs to be manually included).
+ebms-mcmc is a tool for exploring polynomial model spaces with markov walks and performing bayesian model selection. It can extract the model posterior for a toy model with polynomial data and the dark energy equation of state in a polynomial parametrisation from the [Pantheon+][Pantheon+] dataset (needs to be manually included).
 
 [Pantheon+]: https://github.com/PantheonPlusSH0ES/DataRelease
 
@@ -17,7 +17,7 @@ git clone https://github.com/cosmostatistics/ebms_mcmc
 cd ebms_mcmc
 pip install -e .
 ```
-if non-analytical evidences are need, you also need [PyMulitNest][PyMulitNest], follow their installation, and then
+If anything besides Gaussian priors in the toy model is used you also need [PyMulitNest][PyMulitNest], follow their installation, and then
 ```sh
 # final installation step for pymultinest
 pip install -e . [non_anlytical_evidence]
