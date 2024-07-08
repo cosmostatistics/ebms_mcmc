@@ -29,7 +29,7 @@ There are four basic commands implemented, which all have the same structure:
 ```
 ebms_mcmc task params/paramcard.yaml --verbose
 ```
-The ```task``` specifies what to do, ```paramcard.yaml``` sets the parameters, which should differ from default value (defined in ```__init__.py```) and ```--verbose``` prints the output in the console, too/
+The ```task``` specifies what to do, ```paramcard.yaml``` sets the parameters, which should differ from default value (defined in ```__init__.py```) and ```--verbose``` prints the output in the console, too.
 
 1. Toy data generation:
 
