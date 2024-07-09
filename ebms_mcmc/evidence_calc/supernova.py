@@ -9,6 +9,7 @@ from scipy.stats import norm
 import pymultinest
 
 from ..util.logger import separator
+from .save_and_load import load_evidence, write_evidence_file, evidence_file_setup
 
 class Supernova:
     """
@@ -23,7 +24,7 @@ class Supernova:
         n_data (int): Number of data points.
         y_data_inv_covariance (numpy.ndarray): Inverse covariance matrix of the observed data.
         params (dict): Dictionary of parameters.
-        max_poly_deg (int): Maximum polynomial degree.
+        max_poly_degree (int): Maximum polynomial degree.
     
     Methods:
         __init__(self, params: dict) -> None: Initializes the Supernova object.
@@ -53,42 +54,19 @@ class Supernova:
         
         # Param handling
         self.params = params
-        self.max_poly_deg = params['max_poly_degree']
+        self.max_poly_degree = params['max_poly_degree']
         
         # Evidence file handling
-        bin_model = []
-        log_evidence = []
-        log_evidence_error = []
         try:
-            with open(params['resume_evidence_file'], 'r') as f:
-                lines = f.readlines()
-            for line in lines[1:]:
-                bin_rep = np.array([int(i) for i in line.split()[0].split(',')])
-                if len(bin_rep) > self.max_poly_deg + 1:
-                    bin_rep = bin_rep[:self.max_poly_deg + 1]
-                bin_model.append(bin_rep)
-                log_evidence.append(float(line.split()[1]))
-                log_evidence_error.append(float(line.split()[2]))
+            bin_models, log_evidence, log_evidence_error = load_evidence(self.params['resume_evidence_file'], self.max_poly_degree)
             logging.info('Resuming evidence calculation from file {}'.format(self.params['resume_evidence_file']))
         except:
-            pass
-        with open(params['name'] + 'evidence.txt', 'w') as f:
-            f.write('Binary representation' + '    ' + 'log evidence' + '    ' + 'log_evidence_error \n')
-        for i, b in enumerate(bin_model):
-            self.write_evidence_file(b, log_evidence[i], log_evidence_error[i])
-    
-    def write_evidence_file(self, bin_rep: np.array, log_evidence: float, log_evidence_error: float) -> None:
-        """
-        Writes evidence data to a file.
-
-        Args:
-            bin_rep (numpy.ndarray): Binary representation.
-            log_evidence (float): Log evidence.
-            log_evidence_error (float): Log evidence error.
-        """
-        with open(self.params['name'] + 'evidence.txt', 'a') as f:
-            bin_rep_write = ','.join([str(i) for i in bin_rep])
-            f.write(str(bin_rep_write) + '    ' + str(log_evidence) + '    ' + str(log_evidence_error) + '\n')
+            bin_models = []
+            log_evidence = []
+            log_evidence_error = []
+        evidence_file_setup(self.params['name'] + 'evidence.txt')
+        for i, b in enumerate(bin_models):
+            write_evidence_file(self.params['name'] + 'evidence.txt', b, log_evidence[i], log_evidence_error[i])
     
     def distance_lum_ode(self, z: float, d_L: float, bin_model: np.array, theta: np.array, omega_m: float) -> float:
         """
@@ -107,13 +85,13 @@ class Supernova:
         HUBBLE = 70
         SPEED_OF_LIGHT = 299792458
         a = 1 / (1 + z)
-        factors_dlumi = np.zeros(self.max_poly_deg)
-        for j in range(1, self.max_poly_deg + 1):
+        factors_dlumi = np.zeros(self.max_poly_degree)
+        for j in range(1, self.max_poly_degree + 1):
             if bin_model[j] == 1:
                 for k in range(1, j + 1):
                     factors_dlumi[j - 1] += (-1) ** k / k * binom(j, k) * (a ** k - 1)
         
-        k_value = np.arange(0, self.max_poly_deg + 1, dtype=int)
+        k_value = np.arange(0, self.max_poly_degree + 1, dtype=int)
         I1 = np.log(a) * (1 + np.sum(theta / factorial(k_value)))
         I2 = np.sum(factors_dlumi * theta[1:] / factorial(k_value[1:]))
         exponent = -3 * (I1 + I2)
@@ -215,7 +193,7 @@ class Supernova:
         stats = json_data.get_stats()
         log_evidence = stats['nested importance sampling global log-evidence']
         log_evidence_error = stats['nested importance sampling global log-evidence error']
-        self.write_evidence_file(bin_model, log_evidence, log_evidence_error)
+        write_evidence_file(self.params['name'] + 'evidence.txt', bin_model, log_evidence, log_evidence_error)
         logging.info('log_evidence: {}'.format(log_evidence))
         separator()
         return log_evidence, log_evidence_error

@@ -6,6 +6,7 @@ import numpy as np
 import numpy.typing as npt
 
 from ..util.logger import separator
+from .save_and_load import load_evidence, write_evidence_file, evidence_file_setup
 
 class Polynomials:
     """
@@ -56,46 +57,17 @@ class Polynomials:
         self.yCy = self.y_data.T @ self.inv_covariance @ self.y_data      
     
         # Evidence file handling
-        bin_models = []
-        log_evidence = []
-        log_evidence_error = []
         try:
-            with open(params['resume_evidence_file'], 'r') as f:
-                lines = f.readlines()
-            for line in lines[1:]:
-                bin_model = np.array([int(i) for i in line.split()[0].split(',')])
-                if (len(bin_model) > (self.max_poly_degree + 1)) & np.all(bin_model[self.max_poly_degree + 1:] == 0):
-                    bin_model = bin_model[:self.max_poly_degree + 1]
-                elif len(bin_model) < (self.max_poly_degree + 1):
-                    bin_model = np.concatenate((bin_model, np.zeros(self.max_poly_degree + 1 - len(bin_model))))
-                elif len(bin_model) == (self.max_poly_degree + 1):
-                    pass
-                else:
-                    continue
-                bin_models.append(bin_model)
-                log_evidence.append(float(line.split()[1]))
-                log_evidence_error.append(float(line.split()[2]))
+            bin_models, log_evidence, log_evidence_error = load_evidence(self.params['resume_evidence_file'], self.max_poly_degree)
             logging.info('Resuming evidence calculation from file {}'.format(self.params['resume_evidence_file']))
         except:
-            pass
-        with open(params['name'] + 'evidence.txt', 'w') as f:
-            f.write('Binary representation' + '    ' + 'log evidence' + '    ' + 'log_evidence_error \n')
+            bin_models = []
+            log_evidence = []
+            log_evidence_error = []
+        evidence_file_setup(self.params['name'] + 'evidence.txt')
         for i, b in enumerate(bin_models):
-            self.write_evidence_file(b, log_evidence[i], log_evidence_error[i])
-    
-    def write_evidence_file(self, bin_rep: np.array, log_evidence: float, log_evidence_error: float) -> None:
-        """
-        Writes evidence data to a file.
-
-        Args:
-            bin_rep (numpy.ndarray): Binary representation.
-            log_evidence (float): Log evidence.
-            log_evidence_error (float): Log evidence error.
-        """
-        with open(self.params['name'] + 'evidence.txt', 'a') as f:
-            bin_rep_write = ','.join([str(i) for i in bin_rep])
-            f.write(str(bin_rep_write) + '    ' + str(log_evidence) + '    ' + str(log_evidence_error) + '\n')
-    
+            write_evidence_file(self.params['name'] + 'evidence.txt', b, log_evidence[i], log_evidence_error[i])
+            
     def log_evidence(self, bin_model: np.array) -> Tuple[float, float]:
         """
         Calculates the log evidence and its error.
@@ -122,7 +94,7 @@ class Polynomials:
         else:
             logging.error('Parameter prior not implemented.')
             
-        self.write_evidence_file(bin_model, log_evidence, log_evidence_error)
+        write_evidence_file(self.params['name'] + 'evidence.txt', bin_model, log_evidence, log_evidence_error)
         logging.info('log_evidence: {}'.format(log_evidence))
         separator()
         return log_evidence, log_evidence_error        
