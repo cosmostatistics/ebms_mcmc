@@ -36,6 +36,8 @@ run:
   data_type: 'toy_data'
   # if toy_data, which data set
   data_path: 'data/toy_data/0/toy_data.npz'
+  # reuse already calculated evidences, give file path
+  resume_evidence_file: 'output/run_20240704/evidence.txt'
   # max degree which is explored, should be signficantly larger than the true or expected one
   max_poly_degree: 7
   # how many mcmc steps

@@ -44,6 +44,8 @@ default_params = {
         'data_type' : 'toy_data',
         # if toy_data, which data set
         'data_path' : 'data/toy_data/0/toy_data.npz',
+        # reuse already calculated evidences, give file path
+        'resume_evidence_file' : None,
         # max degree which is explored, should be signifactly larger than the true or expected on
         'max_poly_degree' : 7,
         # how many mcmc steps

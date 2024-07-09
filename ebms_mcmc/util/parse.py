@@ -63,7 +63,6 @@ def setup_dir(params: dict) -> str:
     Returns:
         str: The full path to the created directory.
     """
-    print(params)
     full_run_name, run_exists = find_run(params['name'])
     if not run_exists:
         now = datetime.now()

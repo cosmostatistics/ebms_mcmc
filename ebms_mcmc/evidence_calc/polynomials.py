@@ -56,7 +56,7 @@ class Polynomials:
         self.yCy = self.y_data.T @ self.inv_covariance @ self.y_data      
     
         # Evidence file handling
-        bin_model = []
+        bin_models = []
         log_evidence = []
         log_evidence_error = []
         try:
@@ -64,9 +64,15 @@ class Polynomials:
                 lines = f.readlines()
             for line in lines[1:]:
                 bin_model = np.array([int(i) for i in line.split()[0].split(',')])
-                if len(bin_model) > self.max_poly_deg + 1:
-                    bin_model = bin_model[:self.max_poly_deg + 1]
-                bin_model.append(bin_model)
+                if (len(bin_model) > (self.max_poly_degree + 1)) & np.all(bin_model[self.max_poly_degree + 1:] == 0):
+                    bin_model = bin_model[:self.max_poly_degree + 1]
+                elif len(bin_model) < (self.max_poly_degree + 1):
+                    bin_model = np.concatenate((bin_model, np.zeros(self.max_poly_degree + 1 - len(bin_model))))
+                elif len(bin_model) == (self.max_poly_degree + 1):
+                    pass
+                else:
+                    continue
+                bin_models.append(bin_model)
                 log_evidence.append(float(line.split()[1]))
                 log_evidence_error.append(float(line.split()[2]))
             logging.info('Resuming evidence calculation from file {}'.format(self.params['resume_evidence_file']))
@@ -74,7 +80,7 @@ class Polynomials:
             pass
         with open(params['name'] + 'evidence.txt', 'w') as f:
             f.write('Binary representation' + '    ' + 'log evidence' + '    ' + 'log_evidence_error \n')
-        for i, b in enumerate(bin_model):
+        for i, b in enumerate(bin_models):
             self.write_evidence_file(b, log_evidence[i], log_evidence_error[i])
     
     def write_evidence_file(self, bin_rep: np.array, log_evidence: float, log_evidence_error: float) -> None:
@@ -156,7 +162,7 @@ class Polynomials:
             logging.info('No prior Gaussian inverse covariance provided. Using identity matrix.')
             prior_Fisher_Gaussian = np.eye(bin_model.sum())            
         try:
-            prior_exp_Gaussian = self.params['prior_gaussian_exp'] * np.ones(bin_model.sum())
+            prior_exp_Gaussian = self.params['prior_gaussian_mean'] * np.ones(bin_model.sum())
         except:
             logging.info('No prior Gaussian expectation provided. Using zero.')    
             prior_exp_Gaussian = np.zeros(bin_model.sum())
