@@ -70,8 +70,7 @@ def log_evidence(bin_model: np.array) -> Tuple[float, float]:
     Tuple[float, float]: A tuple containing the log evidence and its error.
     """
 ```
-Additionally, you need to ensure that your function writes the calculated log evidence to a file. You can follow the example provided by the **'write_evidence_file'** function in **'ebms_mcmc/evidence_calc/polynomials.py'**.
-
+Additionaly, you need to write the evidences to a file, using the functions in **'ebms_mcmc/evidence_calc/save_and_load.py'**.
 
 ## Acknowledgements
 
