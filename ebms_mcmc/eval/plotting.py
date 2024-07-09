@@ -270,7 +270,7 @@ class Plotting:
         except:
             pass
         for i, a in enumerate(ax):
-            a.set_xticks(np.arange(0,self.max_poly_deg+1,1),fontsize=fs)
+            a.set_xticks(np.arange(0,self.max_poly_deg+1,1))
             a.tick_params(axis='both', labelsize=fs)
             if i == 2:
                 a.set_xlim(-0.5,max_x+0.5)

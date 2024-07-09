@@ -49,7 +49,7 @@ default_params = {
         # max degree which is explored, should be signifactly larger than the true or expected on
         'max_poly_degree' : 7,
         # how many mcmc steps
-        'n_iterations' : 10000,
+        'n_iterations' : 100000,
         # which model prior, either normalisable, AIC, one_over or uniform
         'prior_kind' : 'normalisable',
         # proposal distribution of the mcmc step, either poisson, uniform, or single
