@@ -245,7 +245,7 @@ class Plotting:
         max_y = int(np.max(self.chain_2d[:,1])+1)
         color = 'teal'
         xlabel = [r'$\theta_ix^{i}\,,i=...$','Polynomial degree (d)','Degrees of freedom (n)']
-        ylabel = ['Probability per Term','Probablity', 'Probability']       
+        ylabel = ['Probability per Term','Probability', 'Probability']       
         fs = 22
         fig, ax = plt.subplots(3,1,figsize=(8,22))
         bar_width = 0.6

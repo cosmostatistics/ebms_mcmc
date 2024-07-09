@@ -86,7 +86,6 @@ def run(args: argparse.Namespace) -> None:
         params = {**default_params['run'], **ind_params['run']}
     except:
         params = default_params['run']
-    print(params)
     run_name = setup_dir(params)
     params['name'] = run_name
     init_logger(fn=run_name, verbose=args.verbose)

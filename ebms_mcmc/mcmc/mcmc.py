@@ -82,7 +82,7 @@ class MCMC:
             if self.acceptance_step(rep_act, rep_prop):
                 rep_act = rep_prop
                 accept += 1
-            if i % 100 == 0:
+            if i % 1000 == 0:
                 logging.info(f'Iteration {i} of {self.params["n_iterations"]}')
                 self.save(path)
             path.append(rep_act)
