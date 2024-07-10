@@ -1,7 +1,7 @@
 <h2 align="center">ebms-mcmc: Evidence Based Model Selection with MCMC</h2>
 
 <p align="center">
-<!-- <a href="https://arxiv.org/abs/2401.04174"><img alt="Arxiv" src="https://img.shields.io/badge/arXiv-2401.04174-b31b1b.svg"></a> -->
+<a href="https://arxiv.org/abs/2407.06259"><img alt="Arxiv" src="https://img.shields.io/badge/arXiv-2407.06259-b31b1b.svg"></a>
 
 
 **ebms-mcmc** is a tool for exploring polynomial model spaces with Markov walks and performing Bayesian model selection. It can extract the model posterior for (i) a toy model with polynomial data and for (ii) the dark energy equation of state in a polynomial parametrisation from the [Pantheon+][Pantheon+] dataset (needs to be manually included).
@@ -70,22 +70,22 @@ def log_evidence(bin_model: np.array) -> Tuple[float, float]:
     Tuple[float, float]: A tuple containing the log evidence and its error.
     """
 ```
-Additionaly, you need to write the evidences to a file, using the functions in **'ebms_mcmc/evidence_calc/save_and_load.py'**.
+Additionally, you need to write the evidences to a file, using the functions in **'ebms_mcmc/evidence_calc/save_and_load.py'**.
 
 ## Acknowledgements
 
 If you use any part of this repository please cite the following paper:
-<!-- 
+
 ```
-@article{Schosser:2024aic,
-    author = "Schosser, Benedikt and Heneka, Caroline and Plehn, Tilman",
-    title = "{Optimal, fast, and robust inference of reionization-era cosmology with the 21cmPIE-INN}",
-    eprint = "2401.04174",
-    archivePrefix = "arXiv",
-    primaryClass = "astro-ph.CO",
-    month = "1",
-    year = "2024"
+@misc{schosser2024markovwalkexplorationmodel,
+      title={Markov Walk Exploration of Model Spaces: Bayesian Selection of Dark Energy Models with Supernovae}, 
+      author={Benedikt Schosser and Tobias Röspel and Bjoern Malte Schaefer},
+      year={2024},
+      eprint={2407.06259},
+      archivePrefix={arXiv},
+      primaryClass={astro-ph.CO},
+      url={https://arxiv.org/abs/2407.06259}, 
 }
-``` -->
+```
 
 
