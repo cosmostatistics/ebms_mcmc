@@ -197,22 +197,7 @@ class Supernova:
         logging.info('log_evidence: {}'.format(log_evidence))
         separator()
         return log_evidence, log_evidence_error
-    
-    def append_to_evidence_file(self, bin_model: np.array, log_evidence: float, log_evidence_error: float) -> None:
-        """
-        Appends evidence data to a file.
-
-        Args:
-            bin_model (numpy.ndarray): Binary model.
-            log_evidence (float): Log evidence.
-            log_evidence_error (float): Log evidence error.
-        """
-        evi = np.load(self.params['name'] + 'evidence.npz')
-        bin_model = np.append(evi['bin_model'], bin_model)
-        log_evidence = np.append(evi['log_evidence'], log_evidence)
-        log_evidence_error = np.append(evi['log_evidence_error'], log_evidence_error)
-        np.savez(self.params['name'] + 'evidence.npz', bin_model=bin_model, log_evidence=log_evidence, log_evidence_error=log_evidence_error)
-        
+       
         
         
     
