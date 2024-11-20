@@ -55,6 +55,8 @@ ebms_mcmc plot params/paramcard.yaml --verbose
 ebms_mcmc all params/paramcard.yaml --verbose
 ```
 
+## For a basic example, please check out the notebook in examples/
+
 ## Include your own models
 
 To add a new model, create a file named **'new_model.py'** in the **'ebms_mcmc/evidence_calc/'** directory. This file should contain a function that calculates the log evidence. The function signature should be:
