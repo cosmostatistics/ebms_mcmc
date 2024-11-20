@@ -39,7 +39,7 @@ default_params = {
     'run' : 
         {
         # base name of the run, date is added
-        'name' : 'run',
+        'name' : 'run/',
         # which data, can be toy_data or supernova
         'data_type' : 'toy_data',
         # if toy_data, which data set
@@ -72,9 +72,9 @@ default_params = {
     'plot' : 
         {
         # where is the output of the run, base_name is sufficient
-        'name' : 'run',
+        'name' : 'run/',
         # where the plots in the run_dir are saved
-        'plot_dir' : 'plots',
+        'plot_dir' : 'plots/',
         'burn_in' : 1000,
         'log_plot' : False,
         'plots_to_do' :
