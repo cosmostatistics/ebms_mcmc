@@ -38,9 +38,14 @@ class Polynomials:
         data = np.load(data_path)
         self.x_data = data['x_data']
         self.y_data = data['y_data']
-        self.y_err = data['y_err']
+        try:
+            self.covariance = data['cov']
+        except:
+            self.y_err = data['y_err']
+            self.covariance = np.diag(self.y_err**2)
         self.n_data = len(self.x_data)
         # copy the data to the output directory
+        os.makedirs(params['name'], exist_ok=True)
         shutil.copy(data_path, params['name'])
         
         
@@ -52,7 +57,6 @@ class Polynomials:
         self.x_pow = np.power(self.x_data[:, None], np.arange(0, self.max_poly_degree+1, 1, dtype=np.int64))
         
         # Singular calculations
-        self.covariance = np.diag(self.y_err**2)
         self.inv_covariance = np.diag(1 / self.y_err**2)
         self.yCy = self.y_data.T @ self.inv_covariance @ self.y_data      
     
