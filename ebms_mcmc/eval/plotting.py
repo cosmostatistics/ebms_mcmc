@@ -1,4 +1,5 @@
 import logging
+import os
 from typing import List, Tuple
 import numpy as np
 import matplotlib.pyplot as plt
@@ -55,6 +56,7 @@ class Plotting:
         except:
             self.data = np.load('data/pantheon_data.npz')
             self.type = 'supernova'
+        os.makedirs(self.params['plot_dir'], exist_ok=True)
             
     def analyse(self) -> Tuple[np.array, np.array, np.array, np.array, np.array]:
         """
@@ -225,7 +227,7 @@ class Plotting:
         plt.show()
         plt.close()
         
-    def save_posterior_list(self):
+    def save_posterior_list(self, print_list: bool = False) -> None:
         """
         Saves the posterior list.
         """
@@ -238,6 +240,9 @@ class Plotting:
             for i in sort_index:
                 f.write(f'{model_binairy[i]}\t{relative_counts[i]}\n')
             f.write('----------------')
+        if print_list:
+            with open(self.params['plot_dir'] + 'posterior_list.txt', 'r') as f:
+                print(f.read())
       
     def plot_marginals(self) -> None:
         """
