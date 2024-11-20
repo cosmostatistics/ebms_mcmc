@@ -127,6 +127,7 @@ class Plotting:
         plt.gca().invert_yaxis()
         plt.legend()
         plt.savefig(self.params['plot_dir'] + 'chain_2d_color.pdf')
+        plt.show()
         plt.close()
         
     def visualise_chain_2d_circle(self) -> None:
@@ -170,6 +171,7 @@ class Plotting:
         plt.gca().invert_yaxis()
         plt.legend()
         plt.savefig(self.params['plot_dir'] + 'chain_2d_circle.pdf')
+        plt.show()
         plt.close()
         
     def plot_polynomial_data(self) -> None:
@@ -203,6 +205,7 @@ class Plotting:
         plt.ylabel('y')
         plt.legend(loc = 'upper right')
         plt.savefig(self.params['plot_dir'] + 'polynomial_data.pdf')
+        plt.show()
         plt.close()
         
     def plot_supernova_data(self) -> None:
@@ -219,6 +222,7 @@ class Plotting:
         plt.xlabel('z')
         plt.ylabel('m')
         plt.savefig(self.params['plot_dir'] + 'supernova_data.pdf')
+        plt.show()
         plt.close()
         
     def save_posterior_list(self):
@@ -287,6 +291,7 @@ class Plotting:
         fig.legend(handles, labels, loc='upper center', bbox_to_anchor=(0.5, 0.95), ncol=2, fontsize=fs)
         
         plt.savefig(self.params['plot_dir'] + 'marginals.pdf', bbox_inches='tight')
+        plt.show()
         plt.close()
         
     def main(self):
