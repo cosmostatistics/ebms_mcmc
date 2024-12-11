@@ -50,12 +50,22 @@ class Plotting:
         self.chain_2d = np.zeros((n_samples,2))
         for i in range(n_samples):
             self.chain_2d[i] = self.bin_to_2d(self.path[i])
-        try:
-            self.data = np.load(self.params['name'] + 'toy_data.npz')
-            self.type = 'toy_data'
-        except:
-            self.data = np.load('data/pantheon_data.npz')
-            self.type = 'supernova'
+        data_files = [f for f in os.listdir(self.params['name']) if f.endswith('.npz')]
+        if data_files:
+            if len(data_files) > 1:
+                logging.warning("Multiple data files found, using the first one.")
+                self.data = np.load(os.path.join(self.params['name'], data_files[0]))
+                self.type = 'toy_data'
+        else:
+            pantheon_data_path = 'data/pantheon_data.npz'
+            if os.path.exists(pantheon_data_path):
+                self.data = np.load(pantheon_data_path)
+                self.type = 'supernova'
+            else:
+                logging.error("No valid data files found.")
+                self.data = None
+                self.type = None
+
         os.makedirs(self.params['plot_dir'], exist_ok=True)
             
     def analyse(self) -> Tuple[np.array, np.array, np.array, np.array, np.array]:
@@ -95,7 +105,7 @@ class Plotting:
         return x_coord, y_coord
     
     def visualise_chain_2d_color(self) -> None:
-        # TODO normalisation is incorrect. FIX!!
+
         """
         Visualizes the chain in 2D with color.
         """
