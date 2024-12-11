@@ -95,6 +95,7 @@ class Plotting:
         return x_coord, y_coord
     
     def visualise_chain_2d_color(self) -> None:
+        # TODO normalisation is incorrect. FIX!!
         """
         Visualizes the chain in 2D with color.
         """
@@ -109,14 +110,14 @@ class Plotting:
         else:
             plt.hist2d(self.chain_2d[:,0],self.chain_2d[:,1],
                             bins=[np.arange(0.5,max_x,1),np.arange(-0.5,max_y,1)], density=True)
+        cbar = plt.colorbar()
+        cbar.set_label('Posterior')   
         try:
             bin_model = self.data['bin']
             x, y = self.bin_to_2d(bin_model)
             plt.scatter(x, y, color='darkred', s=100, marker='X', label='True model')
         except:
             pass
-        cbar = plt.colorbar()
-        cbar.set_label('Posterior')
         # set the bins which do not exist to white
         for i in range(max_y):
             for j in range(i,max_x):
