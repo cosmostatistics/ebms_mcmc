@@ -79,16 +79,21 @@ def gen_toy_data(max_poly_degree: int = 2,
                 params=parameter, bin=bin)
         
     if plot:
-        text = r'$y = '  
+        text = r'$y = '
         for i in range(len(parameter)):
             if bin[i] == 1:
+                param = parameter[i]
                 if i == 0:
-                    text += f'{parameter[i]:.2f} +'
+                    # No variable term
+                    text += f'{param:.2f} ' if param >= 0 else f'- {-param:.2f} '
                 elif i == 1:
-                    text += f'{parameter[i]:.2f}x + '
+                    # First-degree term
+                    text += f'+ {param:.2f}x ' if param >= 0 else f'- {-param:.2f}x '
                 else:
-                    text += f'{parameter[i]:.2f}x^{i} + '
-        text = text[:-2] + '$'
+                    # Higher-degree terms with proper LaTeX exponent formatting
+                    text += f'+ {param:.2f}x^{{{i}}} ' if param >= 0 else f'- {-param:.2f}x^{{{i}}} '
+        text = text.strip() + '$'
+
         plt.text(0.1, 0.9, text, fontsize=12, ha='left', va='center', transform=plt.gca().transAxes,
                  bbox=dict(facecolor='white', edgecolor='black', boxstyle='round,pad=0.5'))
         plt.errorbar(x, toy_data, yerr=y_err, fmt='.', ms=5, color='teal', label='Data', alpha=0.5)
