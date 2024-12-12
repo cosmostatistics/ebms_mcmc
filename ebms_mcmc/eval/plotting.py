@@ -80,7 +80,7 @@ class Plotting:
         relative_counts = counts/total_counts
         bin_mean = np.zeros(self.max_poly_deg+1)
         poly_degree_prob = np.zeros(self.max_poly_deg+1)
-        dof_prob = np.zeros(self.max_poly_deg+1)
+        dof_prob = np.zeros(self.max_poly_deg+2)
         
         for i,b in enumerate(model_binairy):
             bin_mean += b*relative_counts[i]
@@ -341,9 +341,11 @@ class Plotting:
             a.set_xticks(np.arange(0,self.max_poly_deg+1,1))
             a.tick_params(axis='both', labelsize=fs)
             if i == 2:
-                a.set_xlim(-0.5,max_x+0.5)
+                a.set_xlim(0.5, max_x+0.5)
+                a.set_xticks(np.arange(1,self.max_poly_deg+2,1))
             else:
-                a.set_xlim(-0.5,max_y+0.5)
+                a.set_xlim(-0.5, max_y+0.5)
+                a.set_xticks(np.arange(0,self.max_poly_deg+1,1))
             a.set_ylim(1e-3,None)
             a.set_xlabel(xlabel[i],fontsize=fs)
             a.set_ylabel(ylabel[i],fontsize=fs)
