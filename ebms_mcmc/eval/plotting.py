@@ -54,8 +54,8 @@ class Plotting:
         if data_files:
             if len(data_files) > 1:
                 logging.warning("Multiple data files found, using the first one.")
-                self.data = np.load(os.path.join(self.params['name'], data_files[0]))
-                self.type = 'toy_data'
+            self.data = np.load(os.path.join(self.params['name'], data_files[0]))
+            self.type = 'toy_data'
         else:
             pantheon_data_path = 'data/pantheon_data.npz'
             if os.path.exists(pantheon_data_path):
@@ -186,8 +186,32 @@ class Plotting:
         plt.savefig(self.params['plot_dir'] + 'chain_2d_circle.pdf')
         plt.show()
         plt.close()
+    
+    def find_map_params(self) -> np.array:
+        try:
+            x_data = self.data['x_data']
+            y_data = self.data['y_data']
+
+        except:
+            logging.error("No toy data found. Cannot find MAP parameters.")
+            logging.error("Analysis of Multinest output not yet implemented")
+            # TODO: Implement analysis of multinest output
+            return
+        model_binairy, relative_counts, _, _, _ = self.analyse()
+        max_index = np.argmax(relative_counts)
+        map_model_bin = model_binairy[max_index]
         
-    def plot_polynomial_data(self) -> None:
+        active_terms = np.where(map_model_bin == 1)[0]
+        x_pow = np.power(x_data[:, None], np.arange(0, active_terms[-1]+1, 1))
+        x_model = x_pow[:, active_terms]
+        theta_hat = np.linalg.inv(x_model.T @ x_model) @ x_model.T @ y_data
+        for i in range(self.max_poly_deg+1):
+            if i not in active_terms:
+                theta_hat = np.insert(theta_hat, i, 0)
+                
+        return theta_hat, map_model_bin
+        
+    def plot_toy_data(self) -> None:
         """
         Plots the polynomial data.
         """
@@ -195,28 +219,52 @@ class Plotting:
         x_data = self.data['x_data']
         y_data = self.data['y_data']
         y_err = self.data['y_err']
-        parameter = self.data['params']
-        bin = self.data['bin']
-        text = r'$y = '  
+        try:
+            parameter = self.data['params']
+            bin = self.data['bin']
+            source = 'True'
+        except:
+            parameter, bin = self.find_map_params()
+            source = 'MAP'
+        text = r'$y = '
         for i in range(len(parameter)):
             if bin[i] == 1:
+                param = parameter[i]
                 if i == 0:
-                    text += f'{parameter[i]:.2f} +'
+                    # No variable term
+                    text += f'{param:.2f} ' if param >= 0 else f'- {-param:.2f} '
                 elif i == 1:
-                    text += f'{parameter[i]:.2f}x + '
+                    # First-degree term
+                    text += f'+ {param:.2f}x ' if param >= 0 else f'- {-param:.2f}x '
                 else:
-                    text += f'{parameter[i]:.2f}x^{i} + '
-        text = text[:-2] + '$'
-        plt.text(0.1, 0.9, text, fontsize=12, ha='left', va='center', transform=plt.gca().transAxes,
-                 bbox=dict(facecolor='white', edgecolor='black', boxstyle='round,pad=0.5'))
+                    # Higher-degree terms with proper LaTeX exponent formatting
+                    text += f'+ {param:.2f}x^{{{i}}} ' if param >= 0 else f'- {-param:.2f}x^{{{i}}} '
+        text = text.strip() + '$'
+
         plt.errorbar(x_data, y_data, yerr=y_err, fmt='.', ms=5, color = 'teal', label='Data', alpha=0.5)
-        x_pow = np.power(x_data[:, None], np.arange(0, parameter.shape[0], 1, dtype=np.int64))
-        y_true = x_pow @ parameter
-        plt.plot(x_data, y_true, label='True model', zorder = 10, color = 'darkred')
+        x_lin_values = np.linspace(np.min(x_data), np.max(x_data), 1000)
+        x_pow = np.power(x_lin_values[:, None], np.arange(0, parameter.shape[0], 1, dtype=np.int64))
+        y_model = x_pow @ parameter
+        plt.plot(x_lin_values, y_model, label=source+' model', zorder = 10, color = 'darkred')
         plt.legend()
         plt.xlabel('x')
         plt.ylabel('y')
         plt.legend(loc = 'upper right')
+        text_x = 0.03
+        text_y = 0.93
+        text_fs = 12
+        text_box = plt.text(text_x, text_y, text, fontsize=text_fs, ha='left', va='center', transform=plt.gca().transAxes,
+                    bbox=dict(facecolor='white', edgecolor='black', boxstyle='round,pad=0.5'))
+        renderer = plt.gcf().canvas.get_renderer()
+        
+        bbox_text = text_box.get_window_extent(renderer)
+        bbox_text = bbox_text.expanded(1.1, 1.1)  # Add margin
+        bbox_legend = plt.gca().get_legend().get_window_extent(renderer)
+        while bbox_text.overlaps(bbox_legend):
+            text_fs -= 1
+            text_box.set_fontsize(text_fs)
+            bbox_text = text_box.get_window_extent(renderer)
+            bbox_text = bbox_text.expanded(1.1, 1.1)  # Add margin
         plt.savefig(self.params['plot_dir'] + 'polynomial_data.pdf')
         plt.show()
         plt.close()
