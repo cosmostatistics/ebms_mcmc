@@ -126,6 +126,7 @@ class Plotting:
             bin_model = self.data['bin']
             x, y = self.bin_to_2d(bin_model)
             plt.scatter(x, y, color='darkred', s=100, marker='X', label='True model')
+            plt.legend()
         except:
             pass
         # set the bins which do not exist to white
@@ -138,7 +139,6 @@ class Plotting:
         plt.xticks(np.arange(1,max_x,1))
         plt.yticks(np.arange(0,max_y,1))
         plt.gca().invert_yaxis()
-        plt.legend()
         plt.savefig(self.params['plot_dir'] + 'chain_2d_color.pdf')
         plt.show()
         plt.close()
@@ -187,7 +187,20 @@ class Plotting:
         plt.show()
         plt.close()
     
-    def find_map_params(self) -> np.array:
+    def find_map_params(self) -> Tuple[np.array, np.array]:
+        """
+        Finds the Maximum A Posteriori (MAP) parameters for the model.
+        This function attempts to retrieve 'x_data' and 'y_data' from the instance's data attribute.
+        If the data is not found, it logs an error and returns None. It then analyzes the model
+        to find the MAP parameters by identifying the model with the highest relative counts.
+        The function constructs the model matrix using the active terms and computes the MAP
+        parameters (theta_hat) using the normal equation. If any polynomial degrees are not active,
+        their corresponding coefficients in theta_hat are set to zero.
+        Returns:
+            Tuple[np.array, np.array]: A tuple containing:
+            - theta_hat (np.array): The MAP parameters for the model.
+            - map_model_bin (np.array): The binary representation of the model with the highest relative counts.
+        """
         try:
             x_data = self.data['x_data']
             y_data = self.data['y_data']
@@ -210,6 +223,18 @@ class Plotting:
                 theta_hat = np.insert(theta_hat, i, 0)
                 
         return theta_hat, map_model_bin
+    
+    def get_map_model_function(self) -> callable:
+        """
+        Returns the MAP model function.
+
+        Returns:
+            callable: The MAP model function.
+        """
+        parameter, _ = self.find_map_params()
+        def model(x: np.array) -> np.array:
+            return np.sum([parameter[i]*x**i for i in range(len(parameter))], axis=0)
+        return model
         
     def plot_toy_data(self) -> None:
         """
@@ -369,11 +394,12 @@ class Plotting:
             self.visualise_chain_2d_circle()
         if 'data' in plots_to_do:
             if self.type == 'toy_data':
-                self.plot_polynomial_data()
+                self.plot_toy_data()
             elif self.type == 'supernova':
                 self.plot_supernova_data()
         if 'marginals' in plots_to_do:
             self.plot_marginals()
+        
         
             
             
